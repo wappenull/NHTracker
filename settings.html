@@ -5,68 +5,13 @@
         <meta charset="ASCII"/>
     </head>
     <body>
-        <div id="nbDoujinshi">Loading...</div>
-        <button id="update">Force Update</button> (Only use if automatic update fail)
-        <hr/>
-        <h3>Preview options:</h3>
-        Doujinshi image preview:
-        <select id="previewImage">
-            <option value="show">Display</option>
-            <option value="blur">Blur</option>
-            <option value="dont">Don't display</option>
-        </select>
-        <hr/>
-        <h3>Search options:</h3>
-        <input id="strictSearch" type="checkbox"/> Enable strict search<br/>
-        <div class="sub">
-            Number of tries before falling back to default search: <input id="nbTriesBeforeDefault" type="number"/><br/>
-            <input id="defaultSearch" type="checkbox"/> Don't fall back on default search (if strict search fail, the search will fail)
-        </div>
-        <div class="sub">
-            Number of tries for default search before failing: <input id="nbTriesBeforeFail" type="number"/>
-        </div>
-        <button id="defaultNormal">Restore default</button><br/>
-        <br/>
-        Explanations:<br/>
-        Strict search is a feature allowing search to be more accurate but to have less chance to success.<br/>
-        The more different tags you have, the more likely the search will succeed (to be sure it doesn't fail, you should have at least 100).<br/>
-        To know how many you have, you can check the "Tag count (uncategorized)" in the "Logs for bug report" section.<br/>
-        If it doesn't find anything after a certains amount of tries, it'll fall back on default search.<br/>
-        <hr/>
-        <h3>Advanced search options: (If you're not sure what you're doing, avoid modifying these)</h3>
-        Number of tags per search: <input id="tagsPerSearch" type="number"/><br/>
-        Number of favorite tags: <input id="favoriteTags" type="number"/><br/>
-        Time between requests: <input id="requestsDelay" type="number"/> ms<br/>
-        <button id="default">Restore default</button><br/>
-        <br/>
-        Explanations:<br/>
-        The extension take all the tags from your favorites doujinshi and order them in descending order.<br/>
-        When doing the requests to get each tag, we need to wait between each requests to each doujinshi (so we don't get a 50X error)<br/>
-        Then it takes X tags from the top of the list, these tags are considered as your favorite tags.<br/>
-        From these X tags, it then take Y random tags and do a search with them.<br/>
-        After that it just take a random doujinshi and show it to you.<br/>
-        <hr/>
-        <h3>Logs for bug report:</h3>
-        When making a bug report, please copy the following information:<br/>
-        <textarea id="logs" rows="10", cols="100" readonly>
-        </textarea>
-        <hr/>
-        <h3>User's tags:</h3>
-        All your tags and where they are from.<br/>
-        If nothing is displayed, press the "Force Update" button at the top of your screen and wait.<br/>
-        Click on a tag to display the doujinshi where they are from.<br/>
-        Click on the image of a doujinshi to see it NHentai page.<br/><br/>
-        Color chart:<br/>
-        Red: Character<br/>
-        Purple: Parody<br/>
-        Blue: Artist<br/>
-        Cyan: Group<br/>
-        Yellow: Category<br/>
-        Green: Language<br/>
-        Grey: Other
-        <br/>
-        <div id="tagsDisplay"></div>
-        <div id="tagsDisplayImage"></div>
+        <div>WAPPEN's NHentai Tracker Extension</div>
+        <button id="save">Save now</button>
+        <button id="update">Fetch your favorite</button> (Must be logged in)
+        <hr />
+        <div id="nbDoujinshi">STAUS TEXT</div>
+        <div id="bookDisplay">book display</div>
     </body>
+    <script src="js/include.js"></script>
     <script src="js/settings.js"></script>
 </html>
