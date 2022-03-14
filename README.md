@@ -16,13 +16,14 @@ Display badge over all book covers. Never got lost in search result again!
 ![Chrome Store](https://developer.chrome.com/images/meta/favicon-32x32.png) Chrome Store: **Sorry none yet!** It needs to pass some ~~fapping~~ err I mean QA testing first.
 
 ### Firefox
-I'm never intended to port to FF yet. Soorry! ~~CHECKMATE FF users!~~
+I'm never intended to port to FF yet. Soorry! (CHECKMATE FF users!)
 
 ------
 
 ### Installing
 - As this is not published to store, the only way to install is via developer mode.
-- Download this from release (.zip) Unzip it to some folder, but dont unzip your pants yet, still some steps to go.
+- Download this entire repo, top right of this web page 'Code' button -> download zip (.zip) 
+- Unzip it to some folder, but dont unzip your pants yet, still some more steps to go.
 - Go into Chrome extension tab, enable developer mode (upper right).
 - Select load unpacked extension (upper left).
 - Point the to folder where you unzip it, where "manifest.json" is. (manifest.json wont show on dialog, that's ok, just select the folder)
@@ -45,14 +46,14 @@ Anyway, if you just installed this Unlimited extension, you still have no way to
 
 ### Q&A
 **Why there are 'READ' and 'IGNORED' book state? What's the difference?**
-  - The 'IGNORED' state is used to mark book as **"I peek at it but nah I passed"** rather than **"I read that"**. 
-  - Example usage is using IGNORE tag on the book you totally not interested in. 
-  - Ignored book will not show in read book listing.
-  - Ignored bool will colored differently in search result.
-  - (TBD) If there is tag cloud gathering feature in the future, which inspect which tag you read the most, it will ignore tag from ignored books.
+- The 'IGNORED' state is used to mark book as **"I peek at it but nah I passed"** rather than **"I read that"**. 
+- Example usage is using IGNORE tag on the book you totally not interested in. 
+- Ignored book will not show in read book listing.
+- Ignored bool will colored differently in search result.
+- (TBD) If there is tag cloud gathering feature in the future, which inspect which tag you read the most, it will ignore tag from ignored books.
   
-**I want XX YY ZZ feature! Please make it!! plzzzz**
-  - Do it yourself, my dude.
+**I want XX YY ZZ feature! Make it!! plzzzz**
+- Do it yourself, my dude.
 
 **What is it inspired from?**
 - I noticed that browser always mark visited link, like from blue to purple for an eon since internet started, but now in 2022 I have trouble looking at doujin search result, how comes?

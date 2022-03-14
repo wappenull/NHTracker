@@ -37,8 +37,11 @@ function RefreshPage()
         let ignoreCount = 0;
         for( let bookId in books )
         {
-            allCount++;
             let state = books[bookId];
+            if( state == null || state === 0 )
+                continue;
+
+            allCount++;
             if( state === STATE_FAV )
                 favCount++;
             else if( state === STATE_IGNORE )
@@ -255,17 +258,24 @@ async function DisplayReadBooks( bookState )
 
         // Check with filter
         let state = bookState[id];
+        if( state == null || state === 0 )
+            continue; // Book can be in Unread (0) state by index page selector override, filter it out
+
         if( g_DisplayFilter === "fav" )
         {
-            if( state !== STATE_FAV ) continue;
+            if( state !== STATE_FAV ) 
+                continue;
         }
         else if( g_DisplayFilter === "ignore" )
         {
-            if( state !== STATE_IGNORE ) continue;
+            if( state !== STATE_IGNORE ) 
+                continue;
         }
         else // Default filter
         {
-            if( state === STATE_IGNORE ) continue;
+            // Filter only these
+            if( state !== STATE_READ && state !== STATE_FAV ) 
+                continue;
         }
 
         let line = document.createElement( "div" );

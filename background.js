@@ -139,6 +139,7 @@ function SetCoverState( id, targetState, force )
     let state = g_ReadBooks[id];
     if( force || (state === undefined || targetState > state) ) // Write if blank, or state is higher
     {
+        console.log( `Set book state ${id} from ${state} => ${targetState}` );
         g_ReadBooks[id] = targetState;
         g_BookStateDirty = true;
     }
