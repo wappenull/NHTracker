@@ -39,10 +39,10 @@ async function CheckPageAndAdd()
     let page = ParseBookNumberFromUrl( location.href );
     g_IndexPageInfo = page;
 
-    let state = STATE_PEEK;
     let bookInfo = null;
+    let state = 0;
 
-    // Check that user must at least go into a page inside to count as read
+    // If in the reading sub page
     if( page.pageNumber > 0 )
         state = STATE_READ;
 
@@ -52,14 +52,21 @@ async function CheckPageAndAdd()
         bookInfo = ParseBookInfoFromIndexPage( document, page.bookId );
 
         // Check if fav button is written 'Unfavorite' that's mean we fav this one
-        if( document.querySelector( "#favorite" ).innerText.includes( "Unfav" ) )
-            state = STATE_FAV;
+        let favTextNode = document.querySelector( "#favorite>.text" );
+        if( favTextNode != null )
+        {
+            if( favTextNode.innerText.includes( "Unfav" ) )
+                state = STATE_FAV; // Change to fav state now
+
+            // Also add a monitor, check for text change from NH doing instead, it is faster than guessing the delay
+            favTextNode.addEventListener( "DOMSubtreeModified", () => _OnFavStateChanged( favTextNode ) );
+        }
     }
 
     if( page.bookId > 0 )
     {
         // Content script cannot access background page, must use messaging
-        // Send state 0 to just update book info
+        // Even if state == 0, it still update book info
         chrome.runtime.sendMessage(
             {
                 cmd: "setbook",
@@ -86,6 +93,17 @@ async function CheckPageAndAdd()
     }
 
     g_CheckPageAndAddRunOnce = true;
+}
+
+function _OnFavStateChanged( favTextNode )
+{
+    if( g_IndexPageInfo == null )
+        return;
+
+    let newState = STATE_READ;
+    if( favTextNode.innerText.includes( "Unfav" ) )
+        newState = STATE_FAV;
+    SetBookCoverState( g_IndexPageInfo.bookId, g_IndexPageCover, newState, true );
 }
 
 async function AcquireGlobalBookState()
@@ -147,7 +165,7 @@ function CreateMarkButtonForCover( coverNode, state, bookId )
         let thisBookId = bookId;
         b.addEventListener( "click", ( e ) => 
         {
-            MarkBookState( thisBookId, coverNode, STATE_READ );
+            SetBookCoverState( thisBookId, coverNode, STATE_READ );
             div.remove(); // Eject entire div root
             e.preventDefault(); // Do not jump for link
         } );
@@ -158,7 +176,7 @@ function CreateMarkButtonForCover( coverNode, state, bookId )
         div.appendChild( b );
         b.addEventListener( "click", ( e ) => 
         {
-            MarkBookState( thisBookId, coverNode, STATE_IGNORE );
+            SetBookCoverState( thisBookId, coverNode, STATE_IGNORE );
             div.remove(); // Eject entire div root
             e.preventDefault(); // Do not jump for link
         } );
@@ -173,6 +191,8 @@ function ParseBookInfoFromCoverNode( coverNode, id )
 {
     let info = new Doujinshi();
     info.id = id;
+    if( coverNode == null )
+        return null;
 
     // ParseBookInfoFromCoverNode will fail if called with cover in index page
     let captionNode = coverNode.querySelector( ".caption" );
@@ -186,7 +206,7 @@ function ParseBookInfoFromCoverNode( coverNode, id )
     return info;
 }
 
-function MarkBookState( bookId, coverNode, state, force )
+function SetBookCoverState( bookId, coverNode, state, force )
 {
     // Auto extract book info from cover
     let bookInfo = ParseBookInfoFromCoverNode( coverNode, bookId );
@@ -214,6 +234,9 @@ function WriteIndexPageTool( state )
 
 function DecorateCoverWithState( bookId, cover, state )
 {
+    if( cover == null )
+        return;
+
     let useDimEffect = false;
     let modifyImgClassTo = "cover read"; // This is custom class injected by our css
 
@@ -299,10 +322,10 @@ function CreateBookStateSelector( coverNode )
     {
         let option = this.options[this.selectedIndex].value;
         option = parseInt( option );
-        if( Number.isNaN( option ) ) 
+        if( Number.isNaN( option ) )
             return;
 
-        MarkBookState( g_IndexPageInfo.bookId, coverNode, option, true );
+        SetBookCoverState( g_IndexPageInfo.bookId, coverNode, option, true );
     } );
 }
 
@@ -316,7 +339,7 @@ async function OnPageRefocus()
     if( !g_CheckPageAndAddRunOnce )
         return;
 
-    console.log('focus check, update all book grid again');
+    console.log( 'focus check, update all book grid again' );
     await AcquireGlobalBookState();
     WriteGridResult( g_BookList, false ); // Rewrite grid result again in case something is updated
 }

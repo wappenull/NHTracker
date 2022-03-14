@@ -62,7 +62,7 @@ function _OnMessage( request, sender, sendResponse )
     {
         if( request.info != null )
             SetBookInfo( request.info );
-        SetBookState( request.id, request.state, request.force );
+        SetCoverState( request.id, request.state, request.force );
     }
     else if( request.cmd == "getbook" )
     {
@@ -131,7 +131,7 @@ function SaveDatabase()
     g_DbStateDirty = false;
 }
 
-function SetBookState( id, targetState, force )
+function SetCoverState( id, targetState, force )
 {
     if( targetState === undefined )
         targetState = STATE_READ;
@@ -317,7 +317,7 @@ function LoadFavoritePage( pageNumber, callback )
             {
                 g_FavAdded++;
                 SetBookInfo( book );
-                SetBookState( book.id, STATE_FAV );
+                SetCoverState( book.id, STATE_FAV );
             } );
 
             if( books.length > 0 )
