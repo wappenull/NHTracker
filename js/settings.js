@@ -232,11 +232,6 @@ function _ProcessHistoryLineFile( text )
 
 /* Book listing ////////////////////////////////////*/
 
-function sleep( ms )
-{
-    return new Promise( resolve => setTimeout( resolve, ms ) );
-}
-
 async function DisplayReadBooks( bookState )
 {
     let root = document.getElementById( "bookDisplay" );
@@ -290,13 +285,12 @@ async function DisplayReadBooks( bookState )
     c = processLater.length;
     for( let i = 0; i < c; i++ )
     {
-        var item = processLater[i];
-        chrome.runtime.sendMessage( { cmd: "getbookinfo", id: item.id }, ( response ) =>
+        let item = processLater[i];
+        await SendMessagePromise( { cmd: "getbookinfo", id: item.id }, ( response ) =>
         {
             if( response.bookInfo == null ) return;
             _WriteBookLineInfo( item.line, response.bookInfo, item.state );
         } );
-        await sleep( 10 );
     }
 
 }

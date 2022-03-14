@@ -18,20 +18,6 @@ function ParseBookInfoFromIndexPage( doc, id )
     return info;
 }
 
-// Wrapper for sendMessage to wait for it response
-function SendMessagePromise( item, callback )
-{
-    return new Promise( ( resolve, reject ) =>
-    {
-        chrome.runtime.sendMessage( item, response =>
-        {
-            if( callback != null )
-                callback( response );
-            resolve();
-        } );
-    } );
-}
-
 // Check current book number for this URL
 async function CheckPageAndAdd()
 {

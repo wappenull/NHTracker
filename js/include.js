@@ -60,3 +60,22 @@ function ParseBookNumberFromUrl( url )
     }
     return output;
 }
+
+// Wrapper for sendMessage to wait for it response
+function SendMessagePromise( item, callback )
+{
+    return new Promise( ( resolve, reject ) =>
+    {
+        chrome.runtime.sendMessage( item, response =>
+        {
+            if( callback != null )
+                callback( response );
+            resolve();
+        } );
+    } );
+}
+
+function sleep( ms )
+{
+    return new Promise( resolve => setTimeout( resolve, ms ) );
+}
