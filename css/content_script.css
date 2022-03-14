@@ -1,0 +1,49 @@
+.read.cover {
+    opacity: .5;
+}
+
+.read.cover:hover {
+    opacity: 1;
+}
+
+.ignore.cover {
+    filter: brightness(0.2);
+}
+
+.ignore.cover:hover {
+    filter: brightness(1);
+}
+
+.coverStatus {
+    color: white;
+}
+
+.read.coverStatus {
+    background-color: blue;
+}
+
+.fav.coverStatus {
+    background-color: goldenrod;
+}
+
+.ignore.coverStatus {
+    background-color: black;
+}
+
+.coverButton {
+    
+}
+
+.read.coverButton {
+    width: 60%;
+}
+
+.ignore.coverButton {
+    width: 40%;
+}
+
+/* Hosts cover button */
+.coverButtonRoot {
+    display: flex;
+    justify-content: space-between;
+}

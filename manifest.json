@@ -1,34 +1,35 @@
 {
-	"name": "NHentai Tracker",
-	"version": "1.0.0",
-	"description": "Keep track off book number you have visited. Show clue in browsing gird and search result.",
-	"icons": {
-	  "64": "Icon.png"
-	},
-	"action": {	}, // Required to access chrome.action
-	"permissions": [
-		"storage",
-		"activeTab",
-		"scripting",
-		"unlimitedStorage" // this is for storage.local for large book db storage
-	],
-	"host_permissions": [
-	  "*://nhentai.net/*",
-	  "*://i.nhentai.net/*"
-	],
-	"content_scripts": [
-	{
-		"matches": ["*://nhentai.net/*"],
-		"js": [ "js/include.js", "js/content_script.js" ]
-	}
-	],
-	"author": "Wappen",
-	"background": {
-		"service_worker": "background.js"
-	},
-	"options_ui": {
-	  "page": "settings.html",
-	  "open_in_tab": true
-	},
-	"manifest_version": 3
+  "name": "NHentai Tracker",
+  "version": "1.0.0",
+  "description": "Keep track off book number you have visited. Show clue in browsing grid and search result.",
+  "icons": {
+    "64": "Icon.png"
+  },
+  "action": {}, // Required to access chrome.action
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "unlimitedStorage" // this is for storage.local for large book db storage
+  ],
+  "host_permissions": [
+    "*://nhentai.net/*",
+    "*://i.nhentai.net/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [ "*://nhentai.net/*" ],
+      "css": [ "css/content_script.css" ],
+      "js": [ "js/include.js", "js/content_script.js" ]
+    }
+  ],
+  "author": "Wappen",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "settings.html",
+    "open_in_tab": true
+  },
+  "manifest_version": 3
 }

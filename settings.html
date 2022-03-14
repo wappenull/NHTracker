@@ -1,17 +1,63 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="css/settings.css"/>
-        <meta charset="ASCII"/>
-    </head>
-    <body>
-        <div>WAPPEN's NHentai Tracker Extension</div>
-        <button id="save">Save now</button>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/settings.css" />
+    <meta charset="ASCII" />
+</head>
+<body>
+    <h1>WAPPEN's NHentai Tracker Extension</h1>
+    <hr />
+    <div>
+        <h2>
+            Storage control
+        </h2>
+        <button id="save">Save now</button><br />
+        <button id="clearStorage">Wipe all</button><br />
+        You are currently using storage for:<br />
+        <div id="syncSpace">SYNC SPACE</div>
+        <div id="localSpace">LOCAL SPACE</div>
+    </div>
+    <hr />
+    <div>
+        <h2>
+            Account control
+        </h2>
         <button id="update">Fetch your favorite</button> (Must be logged in)
-        <hr />
-        <div id="nbDoujinshi">STAUS TEXT</div>
-        <div id="bookDisplay">book display</div>
-    </body>
-    <script src="js/include.js"></script>
-    <script src="js/settings.js"></script>
+    </div>
+    <hr />
+    <div>
+        <h2>Manual hint</h2>
+        <div>
+            <h3>Google Takeout browsing history</h3>
+            Inspect your own entire browsing history and populate "READ" book id by searching for<br />
+            URL pattern like 'nhentai.net/g/NNNNNNN/'<br />
+            Select BrowserHistory.json and submit it here<br />
+            It is processed using JavaScript locally in the extension, it is not upload to remote server anywhere, you can check the source code. This is a matter of trust, you and me :)<br />
+            <form id="historySubmit">
+                <input type="file" id="historyFile" name="filename"><br />
+                <input type="submit">
+            </form>
+            <h3>Using URL file per line</h3>
+            Submit a text file where each line containing URL, the line could include other stuff but extension will search only the URL pattern in each line.<br />
+            You could export this from history tool or something else.<br />
+            <form id="historySubmit2">
+                <input type="file" id="historyFile2" name="filename"><br />
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+    <hr />
+    <div id="nbDoujinshi">STATUS TEXT</div>
+    Filter list:
+    <select id="bookDisplayType">
+        <option value="default">Read+Fav</option>
+        <option value="fav">Fav</option>
+        <option value="ignore">Ignored</option>
+    </select>
+    <br/>
+    <div>If the book is displayed without name (only id) that's mean extension is not yet seen/stored meta data for that book. Go into book index page to make an update.</div>
+    <div id="bookDisplay">book display (If book list does not show up or refresh, that's mean background service broke, reload the extension off-on again)</div>
+</body>
+<script src="js/include.js"></script>
+<script src="js/settings.js"></script>
 </html>

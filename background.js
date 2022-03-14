@@ -13,7 +13,7 @@ catch( e )
 
 // All read book numbers
 // Key: string book number
-// Value: int book state, 1=read, 2=fav
+// Value: int book state, see STATE_READ
 let g_ReadBooks = {};
 
 // Basic book data such as name or image
@@ -53,38 +53,51 @@ function OnUpdateFunction()
     setTimeout( OnUpdateFunction, dt * 1000 ); // Recall this after some time
 }
 
-chrome.runtime.onMessage.addListener(
-    function ( request, sender, sendResponse )
+chrome.runtime.onMessage.addListener( _OnMessage );
+
+function _OnMessage( request, sender, sendResponse )
+{
+    //console.log( "onMessage ", request, sender.tab ? "from a content script:" + sender.tab.url : "from the extension" );
+    if( request.cmd === "setbook" )
     {
-        //console.log( "onMessage ", request, sender.tab ? "from a content script:" + sender.tab.url : "from the extension" );
-        if( request.cmd === "setbook" )
+        if( request.info != null )
+            SetBookInfo( request.info );
+        SetBookState( request.id, request.state, request.force );
+    }
+    else if( request.cmd == "getbook" )
+    {
+        sendResponse( { books: g_ReadBooks } );
+    }
+    else if( request.cmd == "getfav" )
+    {
+        LoadFavorites( ( succeed, reason ) => sendResponse( { succeed, reason } ) );
+        return true; // This is async request, it took long
+    }
+    else if( request.cmd == "getbookinfo" )
+    {
+        GetBookInfo( request.id, ( bookInfo ) => sendResponse( { bookInfo } ) );
+        return true;
+    }
+    else if( request.cmd == "save" )
+    {
+        g_BookStateDirty = true;
+        g_DbStateDirty = true;
+        SaveDatabase();
+    }
+    else if( request.cmd == "bookinfohint" )
+    {
+        if( request.info != null )
         {
-            if( request.info !== undefined )
+            // Only write if we have seen this book in state
+            let bookInfo = request.info;
+            let state = g_ReadBooks[bookInfo.id];
+            if( state != null && state > 0 )
                 SetBookInfo( request.info );
-            SetBookState( request.id, request.state );
-        }
-        else if( request.cmd == "getbook" )
-        {
-            sendResponse( { books: g_ReadBooks } );
-        }
-        else if( request.cmd == "getfav" )
-        {
-            LoadFavorites( ( succeed, reason ) => sendResponse( { succeed, reason } ) );
-            return true; // This is async request, it took long
-        }
-        else if( request.cmd == "getbookinfo" )
-        {
-            GetBookInfo( request.id, ( bookInfo ) => sendResponse( { bookInfo } ) );
-            return true;
-        }
-        else if( request.cmd == "save" )
-        {
-            g_BookStateDirty = true;
-            g_DbStateDirty = true;
-            SaveDatabase();
         }
     }
-);
+    
+}
+
 
 function InitDatabase()
 {
@@ -118,13 +131,13 @@ function SaveDatabase()
     g_DbStateDirty = false;
 }
 
-function SetBookState( id, targetState )
+function SetBookState( id, targetState, force )
 {
     if( targetState === undefined )
         targetState = STATE_READ;
 
     let state = g_ReadBooks[id];
-    if( state === undefined || targetState > state ) // Write if blank, or state is higher
+    if( force || (state === undefined || targetState > state) ) // Write if blank, or state is higher
     {
         g_ReadBooks[id] = targetState;
         g_BookStateDirty = true;
@@ -136,7 +149,7 @@ const BookInfoDbPrefix = "bookinfo_";
 function SetBookInfo( bookInfo )
 {
     // bookInfo object must have id, name field
-    if( bookInfo === undefined || bookInfo.id === undefined || bookInfo.name == undefined )
+    if( bookInfo == null || bookInfo.id == null || bookInfo.name == null )
     {
         console.error( "SetBookInfo passes invalid argument bookInfo", bookInfo );
         return;
@@ -170,7 +183,6 @@ function _MakeStoreSegmentName( key, index )
     return key + "_" + index;
 }
 
-// From https://stackoverflow.com/questions/13373187/can-i-increase-quota-bytes-per-item-in-chrome
 function SyncStorePartitioned( key, objectToStore, storageApi )
 {
     let i = 0;
@@ -253,8 +265,11 @@ function _SyncGetPartitionedInternal( key, index, str, callback, storageApi )
 
 /* Fetching favorite //////////////////////////////////////////////*/
 
+let g_FavAdded = 0;
+
 function LoadFavorites( callback )
 {
+    g_FavAdded = 0;
     fetch( "https://nhentai.net/favorites/" )
         .then( ( response ) =>
         {
@@ -300,14 +315,15 @@ function LoadFavoritePage( pageNumber, callback )
             let books = GetDoujinshisFromHtml( text );
             books.forEach( ( book ) => 
             {
+                g_FavAdded++;
                 SetBookInfo( book );
-                SetBookState( book.id, STATE_FAV, false );
+                SetBookState( book.id, STATE_FAV );
             } );
 
             if( books.length > 0 )
                 LoadFavoritePage( pageNumber + 1, callback );
             else
-                callback( true, "done" );
+                callback( true, g_FavAdded );
         } )
         .catch( ( error ) => 
         {
