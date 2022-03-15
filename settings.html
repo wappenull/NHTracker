@@ -6,16 +6,25 @@
 </head>
 <body>
     <h1>WAPPEN's NHentai Tracker Extension</h1>
+    <div id="version">v</div>
     <hr />
     <div>
         <h2>
             Storage control
         </h2>
-        <button id="save">Save now</button><br />
+        <!--<button id="save">Save now</button><br />-->
         <button id="clearStorage">Wipe all</button><br />
         You are currently using storage for:<br />
         <div id="syncSpace">SYNC SPACE</div>
         <div id="localSpace">LOCAL SPACE</div>
+        <b>v1.1.x Change note:</b><br />
+        Since v1.1.x book state saving is done in local database, so no Google sync anymore. <br />
+        Because sync storage available for extension to save is only up to 100Kb, which is super small.<br />
+        Instead now you can import/export data to other device or for backup.<br />
+        <b>Export</b><br />
+        <button id="exportData">Export</button><br />
+        <b>Import</b><br />
+        <input type="file" id="importFile"><button id="importData">Import</button><br />
     </div>
     <hr />
     <div>
@@ -34,14 +43,15 @@
             Select BrowserHistory.json and submit it here<br />
             It is processed using JavaScript locally in the extension, it is not upload to remote server anywhere, you can check the source code. This is a matter of trust, you and me :)<br />
             <form id="historySubmit">
-                <input type="file" id="historyFile" name="filename"><br />
+                <input type="file" id="historyFile" name="filename">
                 <input type="submit">
             </form>
             <h3>Using URL file per line</h3>
             Submit a text file where each line containing URL, the line could include other stuff but extension will search only the URL pattern in each line.<br />
             You could export this from history tool or something else.<br />
+            <a href="https://chrome.google.com/webstore/detail/history-trends-unlimited/pnmchffiealhkdloeffcdnbgdnedheme">History Trends Unlimited</a> is another good tool to export such data from your history.<br />
             <form id="historySubmit2">
-                <input type="file" id="historyFile2" name="filename"><br />
+                <input type="file" id="historyFile2" name="filename">
                 <input type="submit">
             </form>
         </div>

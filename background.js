@@ -95,36 +95,58 @@ function _OnMessage( request, sender, sendResponse )
                 SetBookInfo( request.info );
         }
     }
-    
+    else if( request.cmd == "wipe" )
+    {
+        g_ReadBooks = {};
+        g_BookDb = {};
+        chrome.storage.local.clear();
+        chrome.storage.sync.clear();
+        SaveDatabase( true );
+    }
+    else if( request.cmd == "dump" )
+    {
+        sendResponse( { books: g_ReadBooks, db: g_BookDb } )
+    }
+    else if( request.cmd == "importDump" )
+    {
+        MergeObject( g_ReadBooks, request.books );
+        MergeObject( g_BookDb, request.db );
+        SaveDatabase( true );
+    }
 }
-
 
 function InitDatabase()
 {
-    SyncGetPartitioned( "books",
-        function ( save ) 
-        {
-            if( save.books == null ) return;
-            g_ReadBooks = save.books;
-            console.log( 'InitDatabase books: ', Object.keys( g_ReadBooks ).length );
-        } );
+    let OnLoadBookState = function ( save ) 
+    {
+        if( save.books == null ) return;
+        
+        // Use merge
+        MergeObject( g_ReadBooks, save.books );
+
+        //console.log( 'InitDatabase books: ', Object.keys( g_ReadBooks ).length );
+    };
+
+    SyncGetPartitioned( "books", OnLoadBookState ); // Migrate from 1.0.x, try in sync storage first
+    SyncGetPartitioned( "books", OnLoadBookState, "local" ); // Then local for 1.1.x
+
     SyncGetPartitioned( "bookdb",
         function ( save )
         {
             if( save.bookdb == null ) return;
             g_BookDb = save.bookdb;
-            console.log( 'InitDatabase bookdb: ', Object.keys( g_BookDb ).length );
+            //console.log( 'InitDatabase bookdb: ', Object.keys( g_BookDb ).length );
         }, "local" );
 }
 
 let g_BookStateDirty = false;
 let g_DbStateDirty = false;
 
-function SaveDatabase()
+function SaveDatabase( force )
 {
-    if( g_BookStateDirty )
-        SyncStorePartitioned( "books", g_ReadBooks );
-    if( g_DbStateDirty )
+    if( force || g_BookStateDirty )
+        SyncStorePartitioned( "books", g_ReadBooks, "local" ); // 1.1.x now save to local for unlimited storage
+    if( force || g_DbStateDirty )
         SyncStorePartitioned( "bookdb", g_BookDb, "local" );
 
     g_BookStateDirty = false;

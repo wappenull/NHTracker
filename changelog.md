@@ -1,0 +1,9 @@
+- 1.1.0
+  - Migrate storage to all local because of very limited sync storage (100Kb). Data is migrated from previous version, and will be saved to local storage from now on.
+  - Ability to import/export internal data.
+- 1.0.2 
+  - Fix book listing in setting page will display wrong line due to message racing
+- 1.0.1
+  - Filter out book state 0 from displaying
+- 1.0.0
+  - Initial release

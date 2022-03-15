@@ -1,16 +1,17 @@
 {
   "name": "NHentai Tracker",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Keep track off book number you have visited. Show clue in browsing grid and search result.",
   "icons": {
     "64": "Icon.png"
   },
-  "action": {}, // Required to access chrome.action
+  "action": {}, /* Required to access chrome.action */
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
-    "unlimitedStorage" // this is for storage.local for large book db storage
+    "unlimitedStorage", /* this is for storage.local for large book db storage */
+    "downloads" /* For downloading exported database back */
   ],
   "host_permissions": [
     "*://nhentai.net/*",

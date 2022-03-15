@@ -75,7 +75,18 @@ function SendMessagePromise( item, callback )
     } );
 }
 
+// Sleep promise for MS, 1000ms = 1 sec
 function sleep( ms )
 {
     return new Promise( resolve => setTimeout( resolve, ms ) );
+}
+
+// Merge key-value from object b to object a
+function MergeObject( a, b )
+{
+    if( a == null || b == null )
+        return;
+
+    for( let key in b )
+        a[key] = b[key];
 }

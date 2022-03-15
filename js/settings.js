@@ -4,16 +4,15 @@
 
 /*///////////////////////////////////////////////////////////////////*/
 
-document.getElementById( "save" ).addEventListener( "click", function ()
-{
-    chrome.runtime.sendMessage( { cmd: "save" } );
+//document.getElementById( "save" ).addEventListener( "click", function ()
+//{
+//    chrome.runtime.sendMessage( { cmd: "save" } );
 
-} );
+//} );
 
 document.getElementById( "clearStorage" ).addEventListener( "click", function ()
 {
-    chrome.storage.sync.clear();
-    chrome.storage.local.clear();
+    chrome.runtime.sendMessage( { cmd: "wipe" } );
     setTimeout( RefreshPage, 300 );
 } );
 
@@ -28,6 +27,12 @@ let g_DisplayFilter = "default";
 
 function RefreshPage()
 {
+    // Write extension version
+    {
+        var manifestData = chrome.runtime.getManifest();
+        document.getElementById( "version" ).innerText = "v" + manifestData.version;
+    }
+
     chrome.runtime.sendMessage( { cmd: "getbook" }, ( response ) => 
     {
         let books = response.books;
@@ -59,10 +64,10 @@ function RefreshPage()
 async function WriteStorageInfoText()
 {
     let syncByte = await chrome.storage.sync.getBytesInUse();
-    document.getElementById( "syncSpace" ).innerText = `Sync storage ${( syncByte / 1024 ).toFixed( 2 )}K (this stores book read state)`;
+    document.getElementById( "syncSpace" ).innerText = `Sync storage ${( syncByte / 1024 ).toFixed( 2 )}K (v1.1.x does not use this anymore because of very limited space)`;
 
     let localByte = await chrome.storage.local.getBytesInUse();
-    document.getElementById( "localSpace" ).innerText = `Local storage ${( localByte / 1024 ).toFixed( 2 )}K (this caches book short meta data such as name)`;
+    document.getElementById( "localSpace" ).innerText = `Local storage ${( localByte / 1024 ).toFixed( 2 )}K`;
 }
 
 /* Favorite fetching ///////////////////////////////////////////////*/
@@ -92,15 +97,15 @@ function OnFavLoaded( succeed, reason )
 document.getElementById( "historySubmit" ).addEventListener( "submit", RunHistoryCheckUsingGoogleTakeOut );
 document.getElementById( "historySubmit2" ).addEventListener( "submit", RunHistoryCheckUsingLineFile );
 
-function RunHistoryCheckUsingGoogleTakeOut( event )
+function _LoadFileFromFileElement( elementId, callback )
 {
-    const selectedFile = document.getElementById( "historyFile" ).files[0];
+    const selectedFile = document.getElementById( elementId ).files[0];
     if( selectedFile != null ) // selectedFile is file object
     {
         let reader = new FileReader();
         reader.onload = function ( e )
         {
-            _ProcessHistoryGoogleTakeOut( e.target.result );
+            callback( e.target.result );
         };
         reader.readAsText( selectedFile );
     }
@@ -111,23 +116,14 @@ function RunHistoryCheckUsingGoogleTakeOut( event )
     event.preventDefault(); // Do not reload the page
 }
 
+function RunHistoryCheckUsingGoogleTakeOut( event )
+{
+    _LoadFileFromFileElement( "historyFile", _ProcessHistoryGoogleTakeOut );
+}
+
 function RunHistoryCheckUsingLineFile( event )
 {
-    const selectedFile = document.getElementById( "historyFile2" ).files[0];
-    if( selectedFile != null ) // selectedFile is file object
-    {
-        let reader = new FileReader();
-        reader.onload = function ( e )
-        {
-            _ProcessHistoryLineFile( e.target.result );
-        };
-        reader.readAsText( selectedFile );
-    }
-    else
-    {
-        alert( "File not selected, dont be shy, select one!" );
-    }
-    event.preventDefault(); // Do not reload the page
+    _LoadFileFromFileElement( "historyFile2", _ProcessHistoryLineFile );
 }
 
 /*
@@ -258,18 +254,18 @@ async function DisplayReadBooks( bookState )
 
         if( g_DisplayFilter === "fav" )
         {
-            if( state !== STATE_FAV ) 
+            if( state !== STATE_FAV )
                 continue;
         }
         else if( g_DisplayFilter === "ignore" )
         {
-            if( state !== STATE_IGNORE ) 
+            if( state !== STATE_IGNORE )
                 continue;
         }
         else // Default filter
         {
             // Filter only these
-            if( state !== STATE_READ && state !== STATE_FAV ) 
+            if( state !== STATE_READ && state !== STATE_FAV )
                 continue;
         }
 
@@ -303,6 +299,58 @@ function _WriteBookLineInfo( lineNode, bookInfo, state )
     if( state === STATE_IGNORE )
         txt += " (IGNORED)";
     lineNode.innerText = txt;
+}
+
+/* Import export service ///////////////////////////////////////////////*/
+
+document.getElementById( "exportData" ).addEventListener( "click", ExportUserData );
+document.getElementById( "importData" ).addEventListener( "click", ImportUserData );
+
+function ExportUserData()
+{
+    chrome.runtime.sendMessage( { cmd: "dump" }, ( response ) => 
+    {
+        let books = response.books; // Book state
+        let db = response.db; // Book info db
+        let json = JSON.stringify( { books, db } );
+        let blob = new Blob( [json], { type: "text/plain" } );
+        var url = URL.createObjectURL( blob );
+        chrome.downloads.download( {
+            url: url,
+            filename: "NHTrackerData.json",
+            saveAs: true // Download using save as dialog
+        } );
+    } );
+}
+
+function ImportUserData()
+{
+    _LoadFileFromFileElement( "importFile", _ProcessImportUserData );
+}
+
+function _ProcessImportUserData( text )
+{
+    try
+    {
+        let obj = JSON.parse( text );
+        if( obj.books != null && obj.db != null )
+        {
+            chrome.runtime.sendMessage( { cmd: "importDump", books: obj.books, db: obj.db } );
+            alert( 
+                `Merged ${Object.keys(obj.books).length} books state, ${Object.keys(obj.db).length} DB entires.` +
+                "\nNote that this is a merge operation, if you wish to start new, wipe data then import again."
+                );
+            setTimeout( RefreshPage, 300 );
+        }
+        else
+        {
+            throw false;
+        }
+    }
+    catch( e )
+    {
+        alert( "File is not valid NHTracker save file" );
+    }
 }
 
 /* Option service //////////////////////////////////////////////////////*/
