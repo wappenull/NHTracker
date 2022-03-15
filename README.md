@@ -7,10 +7,8 @@ Display badge over all book covers. Never got lost in search result again!
 ![Preview](preview/preview2.png)
 
 ### Features
- - Auto mark as READ when you go into any page to read.
- - Or mark them as IGNORED because you want to pass on it.
- - Display them over search result to quickly skim for new book to read.
- - Book read state will sync over browser by chrome sync storage.
+- Mark book as READ or IGNORED and display them over search result to quickly skim for new book to read.
+- Also auto mark as READ when you go into any of its page to read.
 
 ### Chrome
 ![Chrome Store](https://developer.chrome.com/images/meta/favicon-32x32.png) Chrome Store: **Sorry none yet!** It needs to pass some ~~fapping~~ err I mean QA testing first.
