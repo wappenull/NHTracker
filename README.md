@@ -46,6 +46,7 @@ Anyway, if you just installed this Unlimited extension, you still have no way to
 **Why there are 'READ' and 'IGNORED' book state? What's the difference?**
 - The 'IGNORED' state is used to mark book as **"I peek at it but nah I passed"** rather than **"I read that"**. 
 - Example usage is using IGNORE tag on the book you totally not interested in. 
+- Or another usage is to mark them on another sibling books. (incompleted, reuploaded, low quality, bad translation, etc)
 - Ignored book will not show in read book listing.
 - Ignored bool will colored differently in search result.
 - (TBD) If there is tag cloud gathering feature in the future, which inspect which tag you read the most, it will ignore tag from ignored books.
