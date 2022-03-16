@@ -5,7 +5,7 @@ Display badge over all book covers. Never got lost in search result again!
 
 ![Preview](preview/preview.jpg)
 ![Preview](preview/preview2.png)
-![Preview](preview/preview3.png)
+![Preview](preview/preview3.jpg)
 
 ### Features
 - Mark book as READ or IGNORED and display them over search result to quickly skim for new book to read.
