@@ -1,20 +1,23 @@
 
-# WAPPEN's NHentai Tracker Extension
+# WAPPEN's NHentai Tracker Extension (Now v1.2.0)
 A Chrome extension to help you keep track of read book number.
 Display badge over all book covers. Never got lost in search result again!
 
 ![Preview](preview/preview.jpg)
 ![Preview](preview/preview2.png)
+![Preview](preview/preview3.png)
 
 ### Features
 - Mark book as READ or IGNORED and display them over search result to quickly skim for new book to read.
 - Also auto mark as READ when you go into any of its page to read.
+- Mark as read later for reading list.
+- See ![changelog.md](changelog.md) for change list.
 
 ### Chrome
 ![Chrome Store](https://developer.chrome.com/images/meta/favicon-32x32.png) Chrome Store: **Sorry none yet!** It needs to pass some ~~fapping~~ err I mean QA testing first.
 
 ### Firefox
-I'm never intended to port to FF yet. Soorry! (CHECKMATE FF users!)
+I'm never intended to port to FF yet. Sooooorry! (CHECKMATE FF users!)
 
 ------
 
@@ -34,25 +37,30 @@ I'm never intended to port to FF yet. Soorry! (CHECKMATE FF users!)
 
 ### Pulling past visit from history
 Extension can do it in 2 ways, none of them are automated, so you need some work.
-- Google takeout (not much detailed history though, I pulled only a few out of it)
-- Export current Chrome history (note that [chrome will only hold up to 3 months of history locally](https://superuser.com/questions/364470/), which is stupid if you ask me)
+- Google takeout (not much detailed history though, I pulled only a few out of it), to start, google something like "google export browsing history".
+- Or you export current Chrome history (note that [chrome will only hold up to 3 months of history locally](https://superuser.com/questions/364470/), which is stupid if you ask me)
 - I used this extension, [History Trends Unlimited](https://chrome.google.com/webstore/detail/history-trends-unlimited/pnmchffiealhkdloeffcdnbgdnedheme) which crunch history and further saving it longer than 3 months limit. 
 Anyway, if you just installed this Unlimited extension, you still have no way to bring back your history beyond that 3 months anyway.
 - If you have history exported from **History Trends Unlimited**, scan it in NHTracker's setting page in the second file submit section.
+
+### Upgrading
+- Upgrading from previous version, just redownload this again and unzip to same location.
+- In your chrome extension page, click the circle arrow (reload extension) and you are done. Notice the version number should changed.
+- If you have any NH tab already open you need to refresh them once for the new version to take effect.
 
 ------
 
 ### Q&A
 **Why there are 'READ' and 'IGNORED' book state? What's the difference?**
-- The 'IGNORED' state is used to mark book as **"I peek at it but nah I passed"** rather than **"I read that"**. 
+- The 'IGNORED' state is used to mark book as **"Checked that out but passed"** rather than **"I read that! (to the end!)"**. 
 - Example usage is using IGNORE tag on the book you totally not interested in. 
 - Or another usage is to mark them on another sibling books. (incompleted, reuploaded, low quality, bad translation, etc)
 - Ignored book will not show in read book listing.
 - Ignored bool will colored differently in search result.
-- (TBD) If there is tag cloud gathering feature in the future, which inspect which tag you read the most, it will ignore tag from ignored books.
   
 **I want XX YY ZZ feature! Make it!! plzzzz**
-- Do it yourself, my dude.
+- If it sounds good, pitch it to me via issue page.
+- Else you have to learn HTML+JavaScript and do it yourself. :P
 
 **What is it inspired from?**
 - I noticed that browser always mark visited link, like from blue to purple for an eon since internet started, but now in 2022 I have trouble looking at doujin search result, how comes?

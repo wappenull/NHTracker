@@ -1,3 +1,7 @@
+- 1.2.0
+  - New "ToRead" state which just a read later list. Mark a book to ToRead from their index page, find them later in extension dashboard.
+  - Book list displayed in extension dashboard how have clickable link for their book number.
+  - Dashboard book filter persist over refresh
 - 1.1.0
   - Migrate storage to all local because of very limited sync storage (100Kb). Data is migrated from previous version, and will be saved to local storage from now on.
   - Ability to import/export internal data.

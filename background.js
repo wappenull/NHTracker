@@ -159,12 +159,27 @@ function SetCoverState( id, targetState, force )
         targetState = STATE_READ;
 
     let state = g_ReadBooks[id];
-    if( force || (state === undefined || targetState > state) ) // Write if blank, or state is higher
+    if( force || _CanBookStateTranslateFrom( state, targetState ) ) // Write only if state translation is allowed
     {
         console.log( `Set book state ${id} from ${state} => ${targetState}` );
         g_ReadBooks[id] = targetState;
         g_BookStateDirty = true;
     }
+}
+
+function _CanBookStateTranslateFrom( from, to )
+{
+    if( from === undefined )
+        return true; // If first state is blank, then it can turn into any
+
+    // TOREAD is special state, it is actually has priority lower then READ (1) but since we cannot have value under 1
+    // It is hacked for state transition here
+    // It can turn into any state higher than 0
+    if( from === STATE_TOREAD && to > 0 )
+        return true;
+
+    // Else, generic rule, state must be higher in number only
+    return to > from;
 }
 
 const BookInfoDbPrefix = "bookinfo_";
@@ -221,7 +236,7 @@ function SyncStorePartitioned( key, objectToStore, storageApi )
     // Technical note: if string contains a lot of escape character, re-json it will produce more escape character
     // Better gzip that
     str = LZString.compressToBase64( str );
-    const LIMIT = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 16; // Reserve 16 byte for safer margin
+    const LIMIT = storageApi.QUOTA_BYTES_PER_ITEM - key.length - 16; // Reserve 16 byte for safer margin
 
     while( str.length > 0 )
     {

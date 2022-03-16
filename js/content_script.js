@@ -144,34 +144,32 @@ function CreateMarkButtonForCover( coverNode, state, bookId )
         coverNode.insertAdjacentElement( 'afterbegin', div ); // As first child
         div.id = div.className = "coverButtonRoot";
 
-        let b = document.createElement( "button" );
-        b.innerText = "Mark READ";
-        b.className = "coverButton read";
-        div.appendChild( b );
         let thisBookId = bookId;
-        b.addEventListener( "click", ( e ) => 
+        let CreateHeaderButton = function (root, text, className, setToState)
         {
-            SetBookCoverState( thisBookId, coverNode, STATE_READ );
-            div.remove(); // Eject entire div root
-            e.preventDefault(); // Do not jump for link
-        } );
-
-        b = document.createElement( "button" );
-        b.innerText = "IGNORE";
-        b.className = "coverButton ignore";
-        div.appendChild( b );
-        b.addEventListener( "click", ( e ) => 
-        {
-            SetBookCoverState( thisBookId, coverNode, STATE_IGNORE );
-            div.remove(); // Eject entire div root
-            e.preventDefault(); // Do not jump for link
-        } );
+            let b = document.createElement( "button" );
+            b.innerText = text;
+            b.className = className;
+            root.appendChild( b );
+            b.addEventListener( "click", ( e ) => 
+            {
+                SetBookCoverState( thisBookId, coverNode, setToState );
+                div.remove(); // Eject entire div root
+                e.preventDefault(); // Do not jump for link
+            } );
+        };
+        
+        CreateHeaderButton( div, "READ", "coverButton read", STATE_READ );
+        CreateHeaderButton( div, "Later", "coverButton later", STATE_TOREAD );
+        CreateHeaderButton( div, "Ignore", "coverButton ignore", STATE_IGNORE );
     }
     else if( !needToshowButton && div != null )
     {
         div.remove();
     }
 }
+
+
 
 function ParseBookInfoFromCoverNode( coverNode, id )
 {
@@ -254,6 +252,12 @@ function DecorateCoverWithState( bookId, cover, state )
         modifyImgClassTo = "cover ignore";
         useDimEffect = true;
     }
+    else if( state === STATE_TOREAD )
+    {
+        header.className = "coverStatus toread";
+        header.innerHTML = "TO READ";
+        useDimEffect = false;
+    }
     else
     {
         // cover is not needed
@@ -302,6 +306,7 @@ function CreateBookStateSelector( coverNode )
     selector.innerHTML =
         '<option value="header">NHTracker: Override book state to...</option>' +
         `<option value=${STATE_PEEK}>Unread</option>` +
+        `<option value=${STATE_TOREAD}>To read later</option>` +
         `<option value=${STATE_READ}>Read</option>` +
         `<option value=${STATE_IGNORE}>Ignored</option>`;
     selector.addEventListener( 'change', function ()

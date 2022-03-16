@@ -23,44 +23,6 @@ function SetStatusText( txt )
     g_StatusNode.innerHTML = txt;
 }
 
-let g_DisplayFilter = "default";
-
-function RefreshPage()
-{
-    // Write extension version
-    {
-        var manifestData = chrome.runtime.getManifest();
-        document.getElementById( "version" ).innerText = "v" + manifestData.version;
-    }
-
-    chrome.runtime.sendMessage( { cmd: "getbook" }, ( response ) => 
-    {
-        let books = response.books;
-
-        let allCount = 0;
-        let favCount = 0;
-        let ignoreCount = 0;
-        for( let bookId in books )
-        {
-            let state = books[bookId];
-            if( state == null || state === 0 )
-                continue;
-
-            allCount++;
-            if( state === STATE_FAV )
-                favCount++;
-            else if( state === STATE_IGNORE )
-                ignoreCount++;
-        }
-
-        SetStatusText( `You have read ${allCount} books, ${favCount} in favorite. (${ignoreCount} ignored)` );
-
-        DisplayReadBooks( books );
-    } );
-
-    WriteStorageInfoText();
-}
-
 async function WriteStorageInfoText()
 {
     let syncByte = await chrome.storage.sync.getBytesInUse();
@@ -228,10 +190,71 @@ function _ProcessHistoryLineFile( text )
 
 /* Book listing ////////////////////////////////////*/
 
+bookDisplayType.addEventListener( 'change', function ()
+{
+    g_DisplayFilter = this.options[this.selectedIndex].value;
+
+    // Also save this new option
+    chrome.storage.local.set( { g_DisplayFilter } );
+    RefreshPage();
+} );
+
+let g_DisplayFilter = null;
+
+function RefreshPage()
+{
+    // Write extension version
+    {
+        var manifestData = chrome.runtime.getManifest();
+        document.getElementById( "version" ).innerText = "v" + manifestData.version;
+    }
+
+    WriteStorageInfoText();
+
+    chrome.runtime.sendMessage( { cmd: "getbook" }, ( response ) => 
+    {
+        let books = response.books;
+
+        let allCount = 0;
+        let favCount = 0;
+        let ignoreCount = 0;
+        let toreadCount = 0;
+
+        for( let bookId in books )
+        {
+            let state = books[bookId];
+            if( state == null || state === 0 )
+                continue;
+
+            allCount++;
+            if( state === STATE_FAV )
+                favCount++;
+            else if( state === STATE_IGNORE )
+                ignoreCount++;
+            else if( state === STATE_TOREAD )
+                toreadCount++;
+        }
+
+        SetStatusText( `You have read ${allCount} books, ${favCount} in favorite. (${toreadCount} in reading queue) (${ignoreCount} ignored)` );
+
+        DisplayReadBooks( books );
+    } );
+}
+
 async function DisplayReadBooks( bookState )
 {
     let root = document.getElementById( "bookDisplay" );
     root.innerHTML = ''; // Clear all children
+
+    // If this is first run, g_DisplayFilter will be null on page load
+    // Check for previous value in storage
+    if( g_DisplayFilter == null )
+    {
+        // Ask from last time, or default to "default" filter
+        let save = await chrome.storage.local.get( { g_DisplayFilter: "default" } );
+        g_DisplayFilter = save["g_DisplayFilter"];
+        bookDisplayType.value = g_DisplayFilter;
+    }
 
     let allIds = Object.keys( bookState );
 
@@ -257,6 +280,11 @@ async function DisplayReadBooks( bookState )
             if( state !== STATE_FAV )
                 continue;
         }
+        else if( g_DisplayFilter === "toread" )
+        {
+            if( state !== STATE_TOREAD )
+                continue;
+        }
         else if( g_DisplayFilter === "ignore" )
         {
             if( state !== STATE_IGNORE )
@@ -272,33 +300,53 @@ async function DisplayReadBooks( bookState )
         let line = document.createElement( "div" );
         root.appendChild( line );
 
-        let txt = `${id}`
-        line.innerText = txt;
+        let link = document.createElement( "a" );
+        line.appendChild( link );
+        link.textContent = id;
+        link.href = "https://nhentai.net/g/" + id;
+        link.target = "_blank";
 
-        processLater.push( { line, id, state } );
+        let text = document.createTextNode( "" );
+        line.appendChild( text );
+        processLater.push( { line: text, id, state } );
     }
 
-    c = processLater.length;
+    _QueryBookInfoForList( processLater );
+}
+
+let g_QueryJobId = 0;
+async function _QueryBookInfoForList( list )
+{
+    // While for loop is running on very long list, user could change filter option
+    // Will use g_QueryJobId to check if this job can be terminated
+    // Every new call to _QueryBookInfoForList will increment to new job id
+    const thisJobId = ++g_QueryJobId;
+    const c = list.length;
     for( let i = 0; i < c; i++ )
     {
-        let item = processLater[i];
+        if( g_QueryJobId != thisJobId ) break;
+
+        let item = list[i];
         await SendMessagePromise( { cmd: "getbookinfo", id: item.id }, ( response ) =>
         {
+            if( g_QueryJobId != thisJobId ) return;
+            if( item.line == null ) return; // Maybe destroyed from switching
             if( response.bookInfo == null ) return;
             _WriteBookLineInfo( item.line, response.bookInfo, item.state );
         } );
     }
-
 }
 
-function _WriteBookLineInfo( lineNode, bookInfo, state )
+function _WriteBookLineInfo( textNode, bookInfo, state )
 {
-    let txt = `${bookInfo.id} ${bookInfo.name}`;
+    let txt = " " + bookInfo.name;
     if( state === STATE_FAV )
         txt += " (FAVORITE)";
     if( state === STATE_IGNORE )
         txt += " (IGNORED)";
-    lineNode.innerText = txt;
+    if( state === STATE_TOREAD )
+        txt += " (TO READ LATER)";
+    textNode.textContent = txt;
 }
 
 /* Import export service ///////////////////////////////////////////////*/
@@ -352,14 +400,6 @@ function _ProcessImportUserData( text )
         alert( "File is not valid NHTracker save file" );
     }
 }
-
-/* Option service //////////////////////////////////////////////////////*/
-
-bookDisplayType.addEventListener( 'change', function ()
-{
-    g_DisplayFilter = this.options[this.selectedIndex].value;
-    RefreshPage();
-} );
 
 /* Page init //////////////////////////////////////////////////////////*/
 RefreshPage();

@@ -30,16 +30,24 @@
     background-color: black;
 }
 
+.toread.coverStatus {
+    background-color: green;
+}
+
 .coverButton {
     
 }
 
 .read.coverButton {
-    width: 60%;
+    width: 40%;
 }
 
 .ignore.coverButton {
-    width: 40%;
+    width: 35%;
+}
+
+.later.coverButton {
+    width: 25%;
 }
 
 /* Hosts cover button */

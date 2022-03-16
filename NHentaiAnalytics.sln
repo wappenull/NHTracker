@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90C81E70-A49F-4F12-AE68-3555932CE838}"
+	ProjectSection(SolutionItems) = preProject
+		changelog.md = changelog.md
+		manifest.json = manifest.json
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "css", "css", "{A62B923A-F0C8-4DC9-BF5F-AFA980CCE5C2}"
+	ProjectSection(SolutionItems) = preProject
+		css\content_script.css = css\content_script.css
+		css\settings.css = css\settings.css
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "js", "js", "{27F16F12-1021-470A-BE25-350D5918E1F4}"
+	ProjectSection(SolutionItems) = preProject
+		background.js = background.js
+		js\content_script.js = js\content_script.js
+		js\include.js = js\include.js
+		js\settings.js = js\settings.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "html", "html", "{95F1A30C-AE2B-44EA-ABDA-58B04A7EC977}"
+	ProjectSection(SolutionItems) = preProject
+		settings.html = settings.html
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A62B923A-F0C8-4DC9-BF5F-AFA980CCE5C2} = {90C81E70-A49F-4F12-AE68-3555932CE838}
+		{27F16F12-1021-470A-BE25-350D5918E1F4} = {90C81E70-A49F-4F12-AE68-3555932CE838}
+		{95F1A30C-AE2B-44EA-ABDA-58B04A7EC977} = {90C81E70-A49F-4F12-AE68-3555932CE838}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74B83193-8FB3-40B8-BFC8-88D4E5BD05BA}
+	EndGlobalSection
+EndGlobal

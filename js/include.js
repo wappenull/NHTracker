@@ -1,5 +1,6 @@
 const STATE_PEEK = 0;
 const STATE_READ = 1;
+const STATE_TOREAD = 2;
 const STATE_IGNORE = 3;
 const STATE_FAV = 10;
 

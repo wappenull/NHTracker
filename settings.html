@@ -17,8 +17,8 @@
         You are currently using storage for:<br />
         <div id="syncSpace">SYNC SPACE</div>
         <div id="localSpace">LOCAL SPACE</div>
-        <b>v1.1.x Change note:</b><br />
-        Since v1.1.x book state saving is done in local database, so no Google sync anymore. <br />
+        <b>v1.1.0 Change note:</b><br />
+        Since v1.1.0 book state saving is done in local database, so no Google sync anymore. <br />
         Because sync storage available for extension to save is only up to 100Kb, which is super small.<br />
         Instead now you can import/export data to other device or for backup.<br />
         <b>Export</b><br />
@@ -31,7 +31,7 @@
         <h2>
             Account control
         </h2>
-        <button id="update">Fetch your favorite</button> (Must be logged in)
+        <button id="update">Fetch your favorite</button> (Must be logged in, would take some time if you have like thousands)
     </div>
     <hr />
     <div>
@@ -48,8 +48,7 @@
             </form>
             <h3>Using URL file per line</h3>
             Submit a text file where each line containing URL, the line could include other stuff but extension will search only the URL pattern in each line.<br />
-            You could export this from history tool or something else.<br />
-            <a href="https://chrome.google.com/webstore/detail/history-trends-unlimited/pnmchffiealhkdloeffcdnbgdnedheme">History Trends Unlimited</a> is another good tool to export such data from your history.<br />
+            You could export this from history tool or something else. <a href="https://chrome.google.com/webstore/detail/history-trends-unlimited/pnmchffiealhkdloeffcdnbgdnedheme" target="_blank">History Trends Unlimited</a> is good tool to export such data from your history.<br />
             <form id="historySubmit2">
                 <input type="file" id="historyFile2" name="filename">
                 <input type="submit">
@@ -62,6 +61,7 @@
     <select id="bookDisplayType">
         <option value="default">Read+Fav</option>
         <option value="fav">Fav</option>
+        <option value="toread">To read later</option>
         <option value="ignore">Ignored</option>
     </select>
     <br/>
