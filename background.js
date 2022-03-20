@@ -66,7 +66,8 @@ function _OnMessage( request, sender, sendResponse )
     }
     else if( request.cmd == "getbook" )
     {
-        sendResponse( { books: g_ReadBooks } );
+        _WaitForDbToLoadAndResponseAsync( () => sendResponse( { books: g_ReadBooks } ) );
+        return true;
     }
     else if( request.cmd == "getfav" )
     {
@@ -115,15 +116,16 @@ function _OnMessage( request, sender, sendResponse )
     }
 }
 
+let g_DatabaseLoaded = 0;
 function InitDatabase()
 {
     let OnLoadBookState = function ( save ) 
     {
+        g_DatabaseLoaded++;
         if( save.books == null ) return;
         
         // Use merge
         MergeObject( g_ReadBooks, save.books );
-
         //console.log( 'InitDatabase books: ', Object.keys( g_ReadBooks ).length );
     };
 
@@ -133,11 +135,25 @@ function InitDatabase()
     SyncGetPartitioned( "bookdb",
         function ( save )
         {
+            g_DatabaseLoaded++;
             if( save.bookdb == null ) return;
             g_BookDb = save.bookdb;
             //console.log( 'InitDatabase bookdb: ', Object.keys( g_BookDb ).length );
         }, "local" );
 }
+
+async function _WaitForDbToLoadAndResponseAsync( callback )
+{ 
+    // Have to wait for DB to load
+    while( g_DatabaseLoaded < 3 )
+    {
+        console.log( "Stall to wait for g_DatabaseLoaded" );
+        await sleep( 50 );
+    }
+
+    callback( );
+}
+
 
 let g_BookStateDirty = false;
 let g_DbStateDirty = false;

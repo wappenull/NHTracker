@@ -1,3 +1,5 @@
+- 1.2.1
+  - Fix refocusing page will update book grid into all unread state, this is due to background worker is rebooting
 - 1.2.0
   - New "ToRead" state which just a read later list. Mark a book to ToRead from their index page, find them later in extension dashboard.
   - Book list displayed in extension dashboard how have clickable link for their book number.
