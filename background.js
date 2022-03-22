@@ -34,6 +34,8 @@ chrome.runtime.onInstalled.addListener( () =>
 
 chrome.runtime.onSuspend.addListener( () =>
 {
+    // This never called somehow
+    console.log( "Suspending event page" );
     SaveDatabase();
 } );
 
@@ -58,15 +60,16 @@ chrome.runtime.onMessage.addListener( _OnMessage );
 function _OnMessage( request, sender, sendResponse )
 {
     //console.log( "onMessage ", request, sender.tab ? "from a content script:" + sender.tab.url : "from the extension" );
+
+    // Note: As chrome background worker can be put into sleep (unload)
+    // Most API will need to wait for DB to load first if message is sent from child content script just wake the worker
     if( request.cmd === "setbook" )
     {
-        if( request.info != null )
-            SetBookInfo( request.info );
-        SetCoverState( request.id, request.state, request.force );
+        _WriteBookStateFromRequestAsync( request );
     }
     else if( request.cmd == "getbook" )
     {
-        _WaitForDbToLoadAndResponseAsync( () => sendResponse( { books: g_ReadBooks } ) );
+        _GetBookStateAsync( () => sendResponse( { books: g_ReadBooks } ) );
         return true;
     }
     else if( request.cmd == "getfav" )
@@ -76,7 +79,7 @@ function _OnMessage( request, sender, sendResponse )
     }
     else if( request.cmd == "getbookinfo" )
     {
-        GetBookInfo( request.id, ( bookInfo ) => sendResponse( { bookInfo } ) );
+        GetBookInfoAsync( request.id, ( bookInfo ) => sendResponse( { bookInfo } ) );
         return true;
     }
     else if( request.cmd == "save" )
@@ -87,14 +90,7 @@ function _OnMessage( request, sender, sendResponse )
     }
     else if( request.cmd == "bookinfohint" )
     {
-        if( request.info != null )
-        {
-            // Only write if we have seen this book in state
-            let bookInfo = request.info;
-            let state = g_ReadBooks[bookInfo.id];
-            if( state != null && state > 0 )
-                SetBookInfo( request.info );
-        }
+        _SaveBookInfoFromRequestAsync( request );
     }
     else if( request.cmd == "wipe" )
     {
@@ -116,19 +112,52 @@ function _OnMessage( request, sender, sendResponse )
     }
 }
 
+async function _WriteBookStateFromRequestAsync( request )
+{
+    await WaitForDbToLoad();
+    if( request.info != null )
+        SetBookInfo( request.info );
+    SetCoverState( request.id, request.state, request.force );
+}
+
+async function _GetBookStateAsync( callback )
+{
+    await WaitForDbToLoad();
+    callback();
+}
+
+async function _SaveBookInfoFromRequestAsync( request )
+{
+    await WaitForDbToLoad();
+    if( request.info != null )
+    {
+        // Only write if we have seen this book in state
+        let bookInfo = request.info;
+        let state = g_ReadBooks[bookInfo.id];
+        if( state != null && state > 0 )
+            SetBookInfo( request.info );
+    }
+}
+
 let g_DatabaseLoaded = 0;
 function InitDatabase()
 {
+    if( g_DatabaseLoaded != 0 )
+        return;
+
+    g_DatabaseLoaded++;
     let OnLoadBookState = function ( save ) 
     {
         g_DatabaseLoaded++;
         if( save.books == null ) return;
-        
+
         // Use merge
+        console.log( "InitDatabase OnLoadBookState called" );
         MergeObject( g_ReadBooks, save.books );
         //console.log( 'InitDatabase books: ', Object.keys( g_ReadBooks ).length );
     };
 
+    console.log( "Issue InitDatabase" );
     SyncGetPartitioned( "books", OnLoadBookState ); // Migrate from 1.0.x, try in sync storage first
     SyncGetPartitioned( "books", OnLoadBookState, "local" ); // Then local for 1.1.x
 
@@ -142,16 +171,20 @@ function InitDatabase()
         }, "local" );
 }
 
-async function _WaitForDbToLoadAndResponseAsync( callback )
-{ 
+async function WaitForDbToLoad()
+{
     // Have to wait for DB to load
-    while( g_DatabaseLoaded < 3 )
+    while( g_DatabaseLoaded < 4 )
     {
         console.log( "Stall to wait for g_DatabaseLoaded" );
         await sleep( 50 );
     }
+}
 
-    callback( );
+async function _WaitForDbToLoadAndResponseAsync( callback )
+{
+    await WaitForDbToLoad();
+    callback();
 }
 
 
@@ -161,7 +194,11 @@ let g_DbStateDirty = false;
 function SaveDatabase( force )
 {
     if( force || g_BookStateDirty )
+    {
         SyncStorePartitioned( "books", g_ReadBooks, "local" ); // 1.1.x now save to local for unlimited storage
+        console.log( "SaveDatabase ran" );
+    }
+
     if( force || g_DbStateDirty )
         SyncStorePartitioned( "bookdb", g_BookDb, "local" );
 
@@ -180,6 +217,7 @@ function SetCoverState( id, targetState, force )
         console.log( `Set book state ${id} from ${state} => ${targetState}` );
         g_ReadBooks[id] = targetState;
         g_BookStateDirty = true;
+        g_SaveCountdown = 15; // Quick Hack: make sure to save after some interval if there is API call, counter could be as high as SAVE_INTERVAL and worker could shutdown between that
     }
 }
 
@@ -198,8 +236,6 @@ function _CanBookStateTranslateFrom( from, to )
     return to > from;
 }
 
-const BookInfoDbPrefix = "bookinfo_";
-
 function SetBookInfo( bookInfo )
 {
     // bookInfo object must have id, name field
@@ -216,8 +252,11 @@ function SetBookInfo( bookInfo )
 
 // Request book db info, search cache or fire API.
 // callback with Doujinshi object
-function GetBookInfo( id, callback )
+async function GetBookInfoAsync( id, callback )
 {
+    await WaitForDbToLoad();
+
+    // Must wait for DB to load first
     if( g_BookDb[id] !== undefined )
     {
         callback( g_BookDb[id] );

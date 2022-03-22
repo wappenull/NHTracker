@@ -1,3 +1,5 @@
+- 1.2.2
+  - Fix if user set a book state when background worker is asleep will not saving any data.
 - 1.2.1
   - Fix refocusing page will update book grid into all unread state, this is due to background worker is rebooting
 - 1.2.0
