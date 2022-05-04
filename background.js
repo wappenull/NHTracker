@@ -39,7 +39,7 @@ chrome.runtime.onSuspend.addListener( () =>
     SaveDatabase();
 } );
 
-const SAVE_INTERVAL = 60;
+const SAVE_INTERVAL = 20;
 let g_SaveCountdown = SAVE_INTERVAL;
 
 function OnUpdateFunction()
@@ -217,7 +217,7 @@ function SetCoverState( id, targetState, force )
         console.log( `Set book state ${id} from ${state} => ${targetState}` );
         g_ReadBooks[id] = targetState;
         g_BookStateDirty = true;
-        g_SaveCountdown = 15; // Quick Hack: make sure to save after some interval if there is API call, counter could be as high as SAVE_INTERVAL and worker could shutdown between that
+        g_SaveCountdown = 0; // Quick Hack: make sure to save after some interval if there is API call, counter could be as high as SAVE_INTERVAL and worker could shutdown between that
     }
 }
 

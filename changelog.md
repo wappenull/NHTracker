@@ -1,3 +1,5 @@
+- 1.2.3
+  - Shorten auto save time, because sometimes background worker just unloaded by Chrome randomly in short period
 - 1.2.2
   - Fix if user set a book state when background worker is asleep will not saving any data.
 - 1.2.1
