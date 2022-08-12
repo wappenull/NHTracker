@@ -11,7 +11,12 @@ function ParseBookInfoFromIndexPage( doc, id )
 {
     let info = new Doujinshi();
     info.id = id;
-    info.name = doc.querySelector( "#info > h1 > span.pretty" ).innerText;
+    // Name node can fail if nhentai has error page
+    let nameNode = doc.querySelector( "#info > h1 > span.pretty" );
+    if( nameNode == null )
+        return null;
+
+    info.name = nameNode.innerText;
     info.image = doc.querySelector( "#cover > a > img" ).src;
     info.tags = []; // no for now
 
@@ -36,6 +41,8 @@ async function CheckPageAndAdd()
     if( page.isIndexPage )
     {
         bookInfo = ParseBookInfoFromIndexPage( document, page.bookId );
+        if( bookInfo == null )
+            return; // Detection can fail
 
         // Check if fav button is written 'Unfavorite' that's mean we fav this one
         let favTextNode = document.querySelector( "#favorite>.text" );
@@ -94,7 +101,10 @@ function _OnFavStateChanged( favTextNode )
 
 async function AcquireGlobalBookState()
 {
-    await SendMessagePromise( { cmd: "getbook" }, ( response ) => g_BookList = response.books );
+    await SendMessagePromise( { cmd: "getbook" }, ( response ) =>
+    {
+        g_BookList = response.books;
+    } );
 }
 
 // Check if current page has linking to another book

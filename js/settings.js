@@ -17,10 +17,16 @@ document.getElementById( "clearStorage" ).addEventListener( "click", function ()
 } );
 
 let g_StatusNode = document.getElementById( "nbDoujinshi" );
+let g_StatusNode2 = document.getElementById( "statusText2" );
 
 function SetStatusText( txt )
 {
     g_StatusNode.innerHTML = txt;
+}
+
+function SetStatusText2( txt )
+{
+    g_StatusNode2.innerHTML = txt;
 }
 
 async function WriteStorageInfoText()
@@ -235,7 +241,7 @@ function RefreshPage()
                 toreadCount++;
         }
 
-        SetStatusText( `You have read ${allCount} books, ${favCount} in favorite. (${toreadCount} in reading queue) (${ignoreCount} ignored)` );
+        SetStatusText( `You have read ${allCount} books, ${favCount} in favorite. (${toreadCount} in reading queue) (${ignoreCount} ignored) Info available ${allCount}` );
 
         DisplayReadBooks( books );
     } );
@@ -304,7 +310,7 @@ async function DisplayReadBooks( bookState )
         line.appendChild( link );
         link.textContent = id;
         link.href = "https://nhentai.net/g/" + id;
-        link.target = "_blank";
+        link.target = "_blank"; // Open in new tab
 
         let text = document.createTextNode( "" );
         line.appendChild( text );
@@ -322,6 +328,7 @@ async function _QueryBookInfoForList( list )
     // Every new call to _QueryBookInfoForList will increment to new job id
     const thisJobId = ++g_QueryJobId;
     const c = list.length;
+    let haveInfo = 0;
     for( let i = 0; i < c; i++ )
     {
         if( g_QueryJobId != thisJobId ) break;
@@ -332,8 +339,12 @@ async function _QueryBookInfoForList( list )
             if( g_QueryJobId != thisJobId ) return;
             if( item.line == null ) return; // Maybe destroyed from switching
             if( response.bookInfo == null ) return;
+
+            haveInfo++;
             _WriteBookLineInfo( item.line, response.bookInfo, item.state );
         } );
+
+        SetStatusText2( `Book info available ${haveInfo}/${c}` );
     }
 }
 

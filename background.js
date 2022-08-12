@@ -39,20 +39,12 @@ chrome.runtime.onSuspend.addListener( () =>
     SaveDatabase();
 } );
 
-const SAVE_INTERVAL = 20;
-let g_SaveCountdown = SAVE_INTERVAL;
-
+// We dont know when chrome will unload our background task, so save quickly
+const SAVE_INTERVAL = 4;
 function OnUpdateFunction()
 {
-    const dt = 2;
-    g_SaveCountdown -= dt;
-    if( g_SaveCountdown <= 0 )
-    {
-        SaveDatabase();
-        g_SaveCountdown = SAVE_INTERVAL;
-
-    }
-    setTimeout( OnUpdateFunction, dt * 1000 ); // Recall this after some time
+    SaveDatabase(); // Check check dirty flag inside
+    setTimeout( OnUpdateFunction, SAVE_INTERVAL * 1000 ); // Recall this after some time
 }
 
 chrome.runtime.onMessage.addListener( _OnMessage );
@@ -217,7 +209,6 @@ function SetCoverState( id, targetState, force )
         console.log( `Set book state ${id} from ${state} => ${targetState}` );
         g_ReadBooks[id] = targetState;
         g_BookStateDirty = true;
-        g_SaveCountdown = 0; // Quick Hack: make sure to save after some interval if there is API call, counter could be as high as SAVE_INTERVAL and worker could shutdown between that
     }
 }
 
@@ -267,7 +258,7 @@ async function GetBookInfoAsync( id, callback )
 }
 
 InitDatabase();
-OnUpdateFunction();
+OnUpdateFunction(); // This will fire initial save cycle chain
 
 /* Helper for storage partitioning //////////////////////////////////*/
 
