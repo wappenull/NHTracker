@@ -19,14 +19,20 @@ document.getElementById( "clearStorage" ).addEventListener( "click", function ()
 let g_StatusNode = document.getElementById( "nbDoujinshi" );
 let g_StatusNode2 = document.getElementById( "statusText2" );
 
-function SetStatusText( txt )
+function SetStatusText( txt, append )
 {
-    g_StatusNode.innerHTML = txt;
+    if( append )
+        g_StatusNode.innerHTML += txt;
+    else
+        g_StatusNode.innerHTML = txt;
 }
 
-function SetStatusText2( txt )
+function SetStatusText2( txt, append )
 {
-    g_StatusNode2.innerHTML = txt;
+    if( append )
+        g_StatusNode2.innerHTML += txt;
+    else
+        g_StatusNode2.innerHTML = txt;
 }
 
 async function WriteStorageInfoText()
@@ -42,13 +48,15 @@ async function WriteStorageInfoText()
 
 document.getElementById( "update" ).addEventListener( "click", function ()
 {
+    _StartAnimateStatusText();
     SetStatusText( "Fetching... (might take a while)" );
     chrome.runtime.sendMessage( { cmd: "getfav" }, ( response ) => OnFavLoaded( response.succeed, response.reason ) );
-
+    
 } );
 
 function OnFavLoaded( succeed, reason )
 {
+    _StopAnimateStatusText();
     if( succeed )
     {
         alert( `Done, ${reason} books fetched from favorite.` );
@@ -58,6 +66,76 @@ function OnFavLoaded( succeed, reason )
     {
         SetStatusText( "Error due to " + reason );
     }
+}
+
+let g_AnimateStatusText = false;
+function _StartAnimateStatusText()
+{
+    g_AnimateStatusText = true;
+    setTimeout( _AnimateStatusText, 500 );
+}
+
+function _AnimateStatusText()
+{
+    SetStatusText( "|", true );
+    if( g_AnimateStatusText ) // While not stop
+        setTimeout( _AnimateStatusText, 250 );
+}
+
+function _StopAnimateStatusText()
+{
+    g_AnimateStatusText = false;
+}
+
+/* Missing book info filing /////////////////////////////////////////////*/
+
+document.getElementById( "getmissinginfo" ).addEventListener( "click", function ()
+{
+    if( confirm( "This will fetch book with missing name.\nLeave it running until dialog box come up, do not press the button again.\nIf you have too many data too fetch, site might kick you, try again later." ) )
+    {
+        GetMissingBookInfoOneByOne( );
+    }
+    
+} );
+
+async function GetMissingBookInfoOneByOne( )
+{
+    SetStatusText( "Fetching... (might take a while)" );
+    let working = true;
+    while( working )
+    {
+        await SendMessagePromise( { cmd: "getmissinginfo" }, ( response ) => {
+            if( response.succeed )
+            {
+                // if reason is non null, background has fetched something
+                // if reason is null, background has no more to fetch
+                let reason = response.reason;
+                if( reason == null )
+                {
+                    // Done
+                    alert( "DONE, No more to fetch!" );
+                    RefreshPage( );
+                    working = false;
+                }
+                else
+                {
+                    // 
+                    SetStatusText( `Fetching... ${reason}` );
+                }
+            }
+            else
+            {
+                working = false;
+                SetStatusText( "Error due to " + reason );
+            }
+        } );
+    }
+    
+}
+
+function OnMissingInfoLoaded( succeed, reason )
+{
+    
 }
 
 /* History submit service ////////////////////////////////////////////////*/
@@ -241,7 +319,7 @@ function RefreshPage()
                 toreadCount++;
         }
 
-        SetStatusText( `You have read ${allCount} books, ${favCount} in favorite. (${toreadCount} in reading queue) (${ignoreCount} ignored) Info available ${allCount}` );
+        SetStatusText( `You have read ${allCount} books, ${favCount} in favorite. (${toreadCount} in reading queue) (${ignoreCount} ignored)` );
 
         DisplayReadBooks( books );
     } );

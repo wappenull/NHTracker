@@ -69,6 +69,11 @@ function _OnMessage( request, sender, sendResponse )
         LoadFavorites( ( succeed, reason ) => sendResponse( { succeed, reason } ) );
         return true; // This is async request, it took long
     }
+    else if( request.cmd == "getmissinginfo" )
+    {
+        LoadMissingInfo( ( succeed, reason ) => sendResponse( { succeed, reason } ) );
+        return true; // This is async request, it took long
+    }
     else if( request.cmd == "getbookinfo" )
     {
         GetBookInfoAsync( request.id, ( bookInfo ) => sendResponse( { bookInfo } ) );
@@ -368,13 +373,14 @@ function LoadFavorites( callback )
             }
             else
             {
-                Promise.reject( new Error( response.statusText ) );
-                console.error( "Error while loading doujinshi count (Code " + this.status + ")." );
+                let errorMsg = `${response.status}: ${response.statusText}`;
+                Promise.reject( new Error( errorMsg ) );
+                console.error( `Error while loading doujinshi count (${errorMsg})` );
             }
         } ).
         catch( ( error ) =>
         {
-            console.error( "Error while loading doujinshi count (Code " + error + ")." );
+            console.error( `Error while loading doujinshi count (${error})` );
 
             callback( false, error );
         } );
@@ -431,6 +437,87 @@ function GetDoujinshisFromHtml( html )
         currDoujinshis.push( new Doujinshi( match[1], image, match[3] ) );
     } );
     return currDoujinshis;
+}
+
+/* Fetch book info API ////////////////////////////*/
+
+// This will fetch only one next missing item (due to background script can be terminated)
+// Caller will need to keep calling to fill all data
+async function LoadMissingInfo( callback )
+{
+    // DB is needed to know what info are missing
+    await WaitForDbToLoad();
+
+    // For each id in registered book, see if info is available in g_BookDb
+    // g_BookDb is object so use for-let
+    for( let id in g_ReadBooks )
+    {
+        if( g_BookDb[id] == null ) // null or undefined, has no info for that ID
+        {
+            let idInt = parseInt( id );
+            if( idInt == null || idInt <= 0 ) continue;
+
+            let info = await FetchBookInfoForIdAsync( id );
+            if( info != null )
+            {
+                SetBookInfo( info );
+                callback( true, id ); // This ID is done
+                break;
+            }
+        }
+    }
+
+    // If we can reach this, no more to fetch
+    callback( true, null );
+}
+
+function FetchBookInfoForIdAsync( id )
+{
+    return fetch( `https://nhentai.net/api/gallery/${id}` )
+        .then( ( response ) =>
+        {
+            if( response.status === 200 )
+            {
+                return response.json().then( ( json ) =>
+                {
+                    let bookInfo = _ExtractBookInfoFromJsonApi( json );
+                    return bookInfo;
+                } );
+            }
+            else if( response.status === 404 ) // In case of not found, return dummy error bookinfo to not let this ID run again
+            {
+                let info = new Doujinshi();
+                info.id = id;
+                info.name = "** ERROR NOT FOUND ** (Book might have removed from NH)";
+                return info;
+            }
+            else
+            {
+                let errorMsg = `${response.status}: ${response.statusText}`;
+                console.error( `Error while loading FetchBookInfoForId (${errorMsg})` );
+                return null; // Do not reject promise here since it will throw on caller await
+            }
+        } )
+        .catch( ( error ) =>
+        {
+            console.error( `Error while loading FetchBookInfoForId (${error})` );
+            return null;
+        } );
+}
+
+// Returns Doujinshi (book info) object
+function _ExtractBookInfoFromJsonApi( json )
+{
+    try {
+        let info = new Doujinshi();
+        info.id = json.id;
+        info.name = json.title.english;
+        // No image URL in this API
+        // Tags are ignored for now
+        return info;
+    } catch (error) {
+        return null;
+    }
 }
 
 /*

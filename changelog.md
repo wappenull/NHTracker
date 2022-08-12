@@ -1,3 +1,6 @@
+- 1.2.4
+  - Fix serious issue where database might randomly not be saved
+  - Add fetch missing book info button
 - 1.2.3
   - Shorten auto save time, because sometimes background worker just unloaded by Chrome randomly in short period
 - 1.2.2

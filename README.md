@@ -1,5 +1,5 @@
 
-# WAPPEN's NHentai Tracker Extension (Now v1.2.0)
+# WAPPEN's NHentai Tracker Extension (Now v1.2.4)
 A Chrome extension to help you keep track of read book number.
 Display badge over all book covers. Never got lost in search result again!
 
