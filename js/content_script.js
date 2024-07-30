@@ -60,7 +60,8 @@ async function CheckPageAndAdd()
         }
     }
 
-    if( page.bookId > 0 && bookInfo != null )
+    // Note: Do not check for 'bookInfo != null' it can be null when reading page 1 of manga
+    if( page.bookId > 0 )
     {
         // Content script cannot access background page, must use messaging
         // Even if state == 0, it still update book info
@@ -369,4 +370,3 @@ async function OnPageRefocus()
 /* Page init //////////////////////////////////////////////////////////*/
 
 CheckPageAndAdd();
-
