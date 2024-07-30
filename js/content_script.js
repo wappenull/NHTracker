@@ -42,7 +42,11 @@ async function CheckPageAndAdd()
     {
         bookInfo = ParseBookInfoFromIndexPage( document, page.bookId );
         if( bookInfo == null )
-            return; // Detection can fail
+        {
+            // It could also be a purged 404 page
+            // Display dropdown box to change status instead
+            // continue down below
+        }
 
         // Check if fav button is written 'Unfavorite' that's mean we fav this one
         let favTextNode = document.querySelector( "#favorite>.text" );
@@ -56,7 +60,7 @@ async function CheckPageAndAdd()
         }
     }
 
-    if( page.bookId > 0 )
+    if( page.bookId > 0 && bookInfo != null )
     {
         // Content script cannot access background page, must use messaging
         // Even if state == 0, it still update book info
@@ -221,8 +225,25 @@ function WriteIndexPageTool( state )
 {
     g_IndexPageCover = document.querySelector( "#cover" );
 
-    // This is running for index page cover, which run separately from suggestion cover below the index page
-    DecorateCoverWithState( g_IndexPageInfo.bookId, g_IndexPageCover, state ); // Index page cover never use dim
+    // Or use <h1>404 Not Found node for purged book
+    let skipCoverEffect = false;
+    if( g_IndexPageCover == null )
+    {
+        // But create as sibling next to it instead
+        let notFoundNode = document.querySelector(".error > h1")
+        if( notFoundNode != null )
+        {
+            g_IndexPageCover = notFoundNode.insertAdjacentElement( 'afterend', document.createElement( 'div' ) );
+            skipCoverEffect = true;
+        }
+    }
+    
+    if( !skipCoverEffect )
+    {
+        // This is running for index page cover, which run separately from suggestion cover below the index page
+        DecorateCoverWithState( g_IndexPageInfo.bookId, g_IndexPageCover, state ); // Index page cover never use dim
+    }
+
     CreateBookStateSelector( g_IndexPageCover ); // Also add selector for user to override book state
 }
 

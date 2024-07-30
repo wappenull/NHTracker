@@ -1,3 +1,5 @@
+- 1.3.0
+  - Add support to purged book (404 Not Found) to still display dropdown status tool for setting book status
 - 1.2.4
   - Fix serious issue where database might randomly not be saved
   - Add fetch missing book info button
