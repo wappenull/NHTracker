@@ -56,7 +56,23 @@ async function CheckPageAndAdd()
                 state = STATE_FAV; // Change to fav state now
 
             // Also add a monitor, check for text change from NH doing instead, it is faster than guessing the delay
-            favTextNode.addEventListener( "DOMSubtreeModified", () => _OnFavStateChanged( favTextNode ) );
+            // Using new MutationObserver as DOMSubtreeModified is deprecated
+            //favTextNode.addEventListener( "DOMSubtreeModified", () => _OnFavStateChanged( favTextNode ) );
+            const config = { attributes: false, childList: true, subtree: true };
+            const callback = (mutationList, observer) => 
+            {
+                // Assumes mutation is only subtree we want, I did not checked or iterate the list https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+                for (const mutation of mutationList) 
+                {
+                    console.log(`The ${mutation.type} on ${mutation.target} was modified.`);
+                }
+                _OnFavStateChanged( favTextNode )
+            };
+
+            const observer = new MutationObserver(callback);
+
+            // Start observing the target node for configured mutations
+            observer.observe(favTextNode, config);
         }
     }
 
