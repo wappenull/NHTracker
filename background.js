@@ -99,13 +99,18 @@ function _OnMessage( request, sender, sendResponse )
     }
     else if( request.cmd == "dump" )
     {
-        sendResponse( { books: g_ReadBooks, db: g_BookDb } )
+        _GetBookStateAsync( () => sendResponse( { books: g_ReadBooks, db: g_BookDb } ) );
+        return true; // This is async request, it took long
     }
     else if( request.cmd == "importDump" )
     {
-        MergeObject( g_ReadBooks, request.books );
-        MergeObject( g_BookDb, request.db );
-        SaveDatabase( true );
+        _GetBookStateAsync( () => 
+        {
+            MergeObject( g_ReadBooks, request.books );
+            MergeObject( g_BookDb, request.db );
+            SaveDatabase( true );
+        } );
+        return true; // This is async request, it took long
     }
 }
 

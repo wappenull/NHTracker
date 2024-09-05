@@ -1,3 +1,5 @@
+- 1.3.2
+  - Fix export/import button to always wait for DB before dumping
 - 1.3.0
   - Add support to purged book (404 Not Found) to still display dropdown status tool for setting book status
 - 1.2.4
