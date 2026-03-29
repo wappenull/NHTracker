@@ -26,6 +26,9 @@ function ParseBookInfoFromIndexPage( doc, id )
 // Check current book number for this URL
 async function CheckPageAndAdd()
 {
+    // Due to some site refreshing, add a delay
+    await sleep(1000);
+
     // Check that it must be nhentai.net/g/NNNNNNN/
     let page = ParseBookNumberFromUrl( location.href );
     g_IndexPageInfo = page;
@@ -386,3 +389,23 @@ async function OnPageRefocus()
 /* Page init //////////////////////////////////////////////////////////*/
 
 CheckPageAndAdd();
+
+navigation.addEventListener( 'navigate', ( event ) =>
+{
+    const url = event.destination.url;
+    console.log( 'Navigating to:', url );
+
+    RemoveAllButtons( );
+
+    // Call your initialization logic here
+    CheckPageAndAdd();
+} );
+
+function RemoveAllButtons()
+{
+    let elements = document.querySelectorAll( '.coverButtonRoot' );
+    elements.forEach( el => el.remove() );
+
+    elements = document.querySelectorAll( '#coverStatus' );
+    elements.forEach( el => el.remove() );
+}

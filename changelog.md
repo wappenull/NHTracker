@@ -1,3 +1,5 @@
+- 1.3.3
+  - Adjust to new SLA design
 - 1.3.2
   - Fix export/import button to always wait for DB before dumping
   - Replace deprecated DOMSubtreeModified
