@@ -27,7 +27,7 @@ function ParseBookInfoFromIndexPage( doc, id )
 async function CheckPageAndAdd()
 {
     // Due to some site refreshing, add a delay
-    await sleep(1000);
+    await sleep(1500);
 
     // Check that it must be nhentai.net/g/NNNNNNN/
     let page = ParseBookNumberFromUrl( location.href );
@@ -257,6 +257,9 @@ function WriteIndexPageTool( state )
             skipCoverEffect = true;
         }
     }
+
+    if( g_IndexPageCover == null )
+        return;
     
     if( !skipCoverEffect )
     {
@@ -345,6 +348,9 @@ function DecorateCoverWithState( bookId, cover, state )
 
 function CreateBookStateSelector( coverNode )
 {
+    if( coverNode == null )
+        return;
+
     // Selector always persist at every state
     let selector = coverNode.querySelector( "#stateSelector" );
     if( selector != null )

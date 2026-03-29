@@ -1,5 +1,7 @@
+- 1.3.4
+  - Small fix due to SPA
 - 1.3.3
-  - Adjust to new SLA design
+  - Adjust to new NH SPA design
 - 1.3.2
   - Fix export/import button to always wait for DB before dumping
   - Replace deprecated DOMSubtreeModified
