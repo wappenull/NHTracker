@@ -1,3 +1,5 @@
+- 1.3.5
+  - Change method to use polling instead
 - 1.3.4
   - Small fix due to SPA
 - 1.3.3

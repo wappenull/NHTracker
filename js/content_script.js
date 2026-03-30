@@ -394,18 +394,19 @@ async function OnPageRefocus()
 
 /* Page init //////////////////////////////////////////////////////////*/
 
+let lastUrl = location.href;
 CheckPageAndAdd();
 
-navigation.addEventListener( 'navigate', ( event ) =>
-{
-    const url = event.destination.url;
-    console.log( 'Navigating to:', url );
+//navigation.addEventListener( 'navigate', ( event ) =>
+//{
+//    const url = event.destination.url;
+//    console.log( 'Navigating to:', url );
 
-    RemoveAllButtons( );
+//    RemoveAllButtons( );
 
-    // Call your initialization logic here
-    CheckPageAndAdd();
-} );
+//    // Call your initialization logic here
+//    //CheckPageAndAdd();
+//} );
 
 function RemoveAllButtons()
 {
@@ -415,3 +416,27 @@ function RemoveAllButtons()
     elements = document.querySelectorAll( '#coverStatus' );
     elements.forEach( el => el.remove() );
 }
+
+function UpdateUrlChange()
+{
+    const currentUrl = location.href;
+
+    if( currentUrl !== lastUrl )
+    {
+        console.log( `To:   ${currentUrl}` );
+
+        // Update the tracker
+        lastUrl = currentUrl;
+
+        // 1. Run your element remover
+        RemoveAllButtons();
+
+        // 2. Run your data snatcher (with a small delay to let the page load)
+        setTimeout( () =>
+        {
+            CheckPageAndAdd();
+        }, 1000 );
+    }
+}
+
+setInterval( UpdateUrlChange, 500); // Checks 2 times per second
